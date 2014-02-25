@@ -95,7 +95,8 @@ class CachedManager(models.Manager):
                 result = None
             else:
                 raise self.model.DoesNotExist
-        cache.set(key, result)
+        if result:
+            cache.set(key, result)
         return result
 
     def _objects_by_pks(self, get_item_func, pks, cache_key, dict_key='pk',
