@@ -159,10 +159,7 @@ class CachedManager(models.Manager):
         result = []
         cache_set = {}
         for t in tuples:
-            if is_list:
-                id = t[0]
-            else:
-                id = t
+            id = is_list and t[0] or t
             ck = keys[id]
             value = values.get(ck, empty_value)
             if value is empty_value:
