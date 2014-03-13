@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 from django.db import models
 from django.core.cache import cache
-
+import urllib
 
 class NotInt(Exception):
     """
@@ -11,13 +11,18 @@ class NotInt(Exception):
     pass
 
 class CachedManager(models.Manager):
-    def key(self, cache_key, kwargs={}, int_only=True):
-        if int_only and kwargs:
+
+    def key(self, cache_key, kwargs={}, int_only=False, quote=False):
+        if kwargs and (int_only or quote):
             new_kwargs = {}
             for k, v in kwargs.iteritems():
                 try:
-                    new_kwargs[k] = int(v)
+                    if int_only:
+                        new_kwargs[k] = int(v)
+                    else:
+                        new_kwargs[k] = urllib.quote(v)
                 except (ValueError, TypeError):
+#                    print e
                     raise NotInt
             kwargs = new_kwargs
         return self.keys[cache_key] % kwargs
@@ -25,7 +30,7 @@ class CachedManager(models.Manager):
     def _from_cache(self, cache_key, kwargs=None, const_kwargs=None,
                     exclude_kwargs=None,
                     one_item=False, only=None,
-                    none_on_error=True, int_only=False, empty_value=-1,
+                    none_on_error=True, int_only=False, quote=False, empty_value=-1,
                     values_list=None, flat=False,
                     order_by=None, limit=None):
         """
@@ -59,7 +64,7 @@ class CachedManager(models.Manager):
         if kwargs is None:
             kwargs = {}
         try:
-            key = self.key(cache_key, kwargs, int_only)
+            key = self.key(cache_key, kwargs, int_only, quote)
             if const_kwargs is None:
                 const_kwargs = {}
             kwargs.update(const_kwargs)
