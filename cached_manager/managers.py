@@ -32,7 +32,8 @@ class CachedManager(models.Manager):
                     one_item=False, only=None,
                     none_on_error=True, int_only=False, quote=False, empty_value=-1,
                     values_list=None, flat=False,
-                    order_by=None, limit=None):
+                    order_by=None, limit=None,
+                    cache_empty=False):
         """
         Tries to find an object in cache by ``key``. If it's possible
         (``cache.get(key) != empty_value``) the object is returned.
@@ -102,6 +103,8 @@ class CachedManager(models.Manager):
                 raise self.model.DoesNotExist
         if result:
             cache.set(key, result)
+        elif cache_empty:
+            cache.set(key, empty_value)
         return result
 
     def _objects_by_pks(self, get_item_func, pks, cache_key, dict_key='pk',
