@@ -69,8 +69,8 @@ class CachedManager(models.Manager):
             if const_kwargs is None:
                 const_kwargs = {}
             kwargs.update(const_kwargs)
-            cached = cache.get(key, empty_value)
-            if cached != empty_value:
+            cached = cache.get(key, None)
+            if cached is not None:
                 return cached
             qset = self.get_query_set()
             if only:
